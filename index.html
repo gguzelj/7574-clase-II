@@ -1,0 +1,623 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>reveal.js</title>
+
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/black.css">
+
+    <!-- Theme used for syntax highlighting of code -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+
+    <!-- Printing and PDF exports -->
+    <script>
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = window.location.search.match(/print-pdf/gi) ? 'css/print/pdf.css' : 'css/print/paper.css';
+        document.getElementsByTagName('head')[0].appendChild(link);
+    </script>
+</head>
+<body>
+<div class="reveal">
+    <div class="slides">
+        <section>
+            <ul>
+                <li>Microservicios</li>
+                <li>REST</li>
+                <li>Serverless architecture</li>
+                <li>Databasese</li>
+            </ul>
+        </section>
+
+
+        <section>
+            <section>
+                <h2>Microservicios</h2>
+                <p>
+                    Long story short: Desacoplar una gran aplicación en varios módulos pequeños, más cohesivos...
+                </p>
+            </section>
+
+            <section>
+                <img src="./images/microservices-architecture.png">
+            </section>
+
+            <section>
+                <h2>Pros</h2>
+
+                <ul>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        <b>Agilidad y productividad:</b> Cada servicio puede evolucionar de manera independiente
+                        (distintos lenguajes, bases de datos, deploys, protocolos de comunicación, etc ...)
+                    </li>
+                    <br>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        <b>Escalabilidad*:</b> Es posible agregar más servidores en el microservicio que más lo requiera
+                    </li>
+                    <br>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        <b>resilience:</b> Ya no tenemos un spf (single point of failure), los componentes pueden fallar
+                        de manera independiente sin afetar a otros
+                    </li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Cons</h2>
+
+                <ul>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        <b>Naturaleza distribuida:</b> El desarrollo de una aplicatión orientada a microservicios se
+                        vuelve más complejo
+                    </li>
+                    <br>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        <b>Equipo maduro:</b> Para alcanzar la independencia el equipo debe ser capaz de manejar el
+                        ciclo de vida completo de una aplicación, cómo decisiones
+                        diseño, implementación, dbs, build, deploy, monitoreo, alertas, etc...
+                    </li>
+                    <br>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        <b>Latencia:</b> Es necesario realizar nuevas llamadas entre los distintos microservicios,
+                        agregando latencia.
+                    </li>
+                </ul>
+            </section>
+
+            <section>
+                <h2><a href="https://martinfowler.com/articles/microservices.html">Martin Fowler</a></h2>
+                <blockquote style="font-size: 30px;line-height: 1.0">
+                    One reasonable argument we've heard is that you shouldn't start with a microservices architecture.
+                    Instead begin with a monolith, keep it modular, and split it into microservices once the monolith
+                    becomes a problem.
+                </blockquote>
+            </section>
+
+            <section>
+                <h3>Otras complicaciones</h3>
+                <p class="fragment" style="font-size: 30px;line-height: 1.0">
+                    La granularidad que nos ofrecen los microservicios por lo general no se corresponde con lo que el
+                    cliente necesita.
+                </p>
+                <p class="fragment" style="font-size: 30px;line-height: 1.0">
+                    Un cliente necesita interactura con muchos microservicios.
+                </p>
+                <p class="fragment" style="font-size: 30px;line-height: 1.0">
+                    Por ejemplo, una página para los detalles de un producto necesitaría:
+                </p>
+                <ul>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        Shopping Cart – Cantidad de items en el carrito de compra
+                    </li>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        Order Service – Historial de pedidos hechos
+                    </li>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        Catalog Service – Información básica del producto (descripción, imagen, precio, etc...)
+                    </li>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        Review Service – Experiencias de otros usuarios con el vendedor
+                    </li>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        Shipping Service – Información sobre el envío, deadlines, costos...
+                    </li>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        Recommendation Service(s) – Servicio de recomendación
+                    </li>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        Entre otros...
+                    </li>
+                </ul>
+            </section>
+
+            <section>
+                <img src="./images/api-gateway-I.png">
+            </section>
+
+            <section id="fragments">
+                <h2>Desventajas</h2>
+
+                <ul>
+                    <li style="font-size: 30px;line-height: 1.0">
+                        Se deben realizar varias llamadas (cada request tiene un alto roundtrip, ya que el tráfico
+                        generado no es local, debe atravezar
+                        potencialemente varios paises)
+                    </li>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        El refactor de los microservicios se torna complejo
+                    </li>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        Es posible que todos los microservicios no usen protocolos web-friendly (por ejemplo, binary
+                        RPC)
+                    </li>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        La información no esta diseñada para ser consumida por ese cliente solamente, por lo que puede
+                        haber más datos de los que realmente necesita
+                    </li>
+                </ul>
+            </section>
+
+            <section>
+                <h3>Solución: Api-gateway</h3>
+
+                <p style="font-size: 30px;line-height: 1.0">
+                    Se realizan las llamadas a un único entry-point. Se puede ver como un patrón de diseño facade.
+                </p>
+
+                <p style="font-size: 30px;line-height: 1.0">
+                    Puede tener otras responsabilidades como authenticación, monitoreo, seguridad, load balancing,
+                    caching de requests, etc...
+                </p>
+
+                <p style="font-size: 20px;">Ejemplo de <a
+                        href="https://medium.com/netflix-techblog/optimizing-the-netflix-api-5c9ac715cf19">netflix</a>
+                </p>
+            </section>
+
+            <section>
+                <img src="./images/api-gateway-II.png">
+            </section>
+
+            <section>
+                <h4>Otra variante: Backend for frontend</h4>
+                <img src="./images/api-gatewat-variant.png" style="height: 500px">
+            </section>
+
+            <section>
+                <h3>Otro problema: transacciones</h3>
+                <p style="font-size: 30px;line-height: 1.0">
+                    Tenemos una aplicación segmentada entre varios microservicios, cada una con su propia base de datos.
+                </p>
+
+                <p class="fragment" style="font-size: 30px;line-height: 1.0">
+                    Algunas transacciones de negocio pueden involucrar a varios servicios, por lo que se necesita
+                    de algún mecanismo que asegure la consistencia de los datos.
+                </p>
+            </section>
+
+            <section>
+                <h3>Solución: sagas</h3>
+                <p style="font-size: 30px;line-height: 1.0">
+                    Una saga es una secuencia de transacciones locales, donde cada transacción actualiza una
+                    parte de la base de datos (a través del microservicio).
+                </p>
+
+                <p class="fragment" style="font-size: 30px;line-height: 1.0">
+                    Al terminar de hacer la actualización parcial publica un evento que dispara a la próxima transacción.
+                </p>
+
+                <p class="fragment" style="font-size: 30px;line-height: 1.0">
+                    Si alguna transacción falla, se ejecutan una serie de transacciones para deshacer los cambios realizados.
+                </p>
+            </section>
+
+            <section>
+                <img src="./images/saga.jpg">
+            </section>
+
+        </section>
+        <section>
+            <section>
+                <h2>REST</h2>
+                <p class="fragment" style="font-size: 30px;line-height: 1.0">
+                    Representational state transfer
+                </p>
+                <p class="fragment" style="font-size: 30px;line-height: 1.0">
+                    Json sobre HTTP ?
+                </p>
+            </section>
+
+            <section>
+                <p style="font-size: 30px;line-height: 1.0">
+                    <a href="http://www.ics.uci.edu/~fielding/pubs/dissertation/top.htm">REST</a> es un estilo de
+                    arquitectura para sistemas distribuidos, expresado como un conjunto de restricciones
+                    que intenta minimizar la latencia y la comunicación de red mientras máximiza la independencia y la
+                    <b>escalabilidad</b>
+                </p>
+            </section>
+
+            <section>
+                <p>Restricciones:</p>
+                <ul>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        Client-Server: Separa responsabilidades
+                    </li>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        Stateless: Induce la escalabilidad, visibilidad y recuperación ante fallas parciales. Agrega
+                        latencia
+                    </li>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        Cache: Aumenta la eficiencia
+                    </li>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        Layered System
+                    </li>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        Code-On-Demand (opcional): Permite extender la funcionalidad (js scripts)
+                    </li>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        Uniform Interface: identificación de recursos y semántica de operación uniforme
+                    </li>
+                </ul>
+            </section>
+
+            <section>
+                <img src="./images/rest-derivation.jpg">
+            </section>
+
+            <section>
+                <p>Uniform Interface</p>
+                <p style="font-size: 30px;line-height: 1.0">Es la interfaz uniforme el elemento diferenciador de este
+                    estilo. Implica que todos los conectores del sistema deben ajustarse a las limitaciones
+                    de esta interfaz. Las cuatro restricciones de interfaz uniforme son:
+                </p>
+                <ul>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        Identification of resources
+                    </li>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        Manipulation of resources through representations
+                    </li>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        Self-descriptive messages
+                    </li>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        Hypermedia as the engine of application state (HATEOAS)
+                    </li>
+                </ul>
+
+            </section>
+
+            <section>
+                <p>Uniform Interface</p>
+                <p style="font-size: 30px;line-height: 1.0">
+                    En términos prácticos, en la World Wide Web, estas restricciones corresponden a:
+                </p>
+                <ul>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        URI (Uniform Resource Identifier)
+                    </li>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        Solicitud HTTP y respuestas
+                    </li>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        Encabezados HTTP con tipos MIME (Multipurpose Internet Mail Extensions)
+                    </li>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        URI incrustado en un tipo de medio de comunicación
+                    </li>
+                </ul>
+
+            </section>
+
+            <section>
+                <p>Hypermedia as the engine of application state (HATEOAS)</p>
+                <pre><code class="xml" data-trim contenteditable style="font-size: 18px;">
+
+                    {
+                       "content":[
+                          {
+                             "price":499.00,
+                             "description":"Apple tablet device",
+                             "name":"iPad",
+                             "links":[
+                                {
+                                   "rel":"self",
+                                   "href":"http://localhost:8080/product/1"
+                                }
+                             ],
+                             "attributes":{
+                                "connector":"socket"
+                             }
+                          },
+                          {
+                             "price":49.00,
+                             "description":"Dock for iPhone/iPad",
+                             "name":"Dock",
+                             "links":[
+                                {
+                                   "rel":"self",
+                                   "href":"http://localhost:8080/product/3"
+                                }
+                             ],
+                             "attributes":{
+                                "connector":"plug"
+                             }
+                          }
+                       ],
+                       "links":[
+                          {
+                             "rel":"product.search",
+                             "href":"http://localhost:8080/product/search"
+                          }
+                       ]
+                    }
+
+                </code></pre>
+            </section>
+
+        </section>
+        <section>
+            <section>
+                <h2><a href="https://martinfowler.com/articles/serverless.html">Serverless architecture</a></h2>
+                <p class="fragment" style="font-size: 30px;line-height: 1.0">
+                    <b>Definicion 1:</b> Una arquitectura tipo serverless se refiere a aplicaciones que dependen fuertemente de un servicio de backend (Baas), solamente ocupandose de la UI.
+                </p>
+                <p class="fragment" style="font-size: 30px;line-height: 1.0">
+                    <b>Definicion 2:</b> Una arquitectura tipo serverless se refiere a aplicaciones que dependen de código que se ejecuta en containers efimeros (Function as a Service or “FaaS”).
+                </p>
+            </section>
+
+            <section>
+                <p style="font-size: 30px;line-height: 1.0">
+                    A pesar del nombre, serverless no significa que la aplicación no corre en un servidor
+                </p>
+                <p class="fragment" style="font-size: 30px;line-height: 1.0">
+                    FaaS nos da la posibilidad de ejecutar código en respuesta a algún evento, sin tener que preocuparnos
+                    por la complejidad de diseñar o mantener la infraestructura.
+                </p>
+            </section>
+
+            <section>
+                <p>FaaS:</p>
+                <p style="font-size: 30px;line-height: 1.0">
+                    Podemos correr código backend sin tener que administrar nuestros propios servidores
+                </p>
+                <p class="fragment" style="font-size: 30px;line-height: 1.0">
+                    No nos exige programar en algún lenguaje/framework particualar.
+                    Existe soporte para Python, Js, Java/Clojure/Scala, etc...
+                </p>
+                <p class="fragment" style="font-size: 30px;line-height: 1.0">
+                    Al no tener servidores, cambia el deploy. Simplemente debemos subir el código al proveedor de Faas
+                </p>
+                <p class="fragment" style="font-size: 30px;line-height: 1.0">
+                    Escalabilidad manejada por el proveedor
+                </p>
+            </section>
+
+            <section>
+                <h3>Estado</h3>
+                <p>
+                    Al derivar del paradigma funcional, las funciones que definamos deben ser stateless.
+                </p>
+                <p class="fragment">
+                    Toda la información necesaria viaja en los parámetros.
+                </p>
+            </section>
+
+            <section>
+                <h3>Ejecución</h3>
+                <p>
+                    Normalmente existen límites en los tiempos de ejecución de cada función (5 minutos para AWS Lambda)
+                </p>
+                <p class="fragment">
+                    No todas las tareas se ajustan a esta restricción (procesos batch)
+                </p>
+            </section>
+
+            <section>
+                <h3>Latencia en start up</h3>
+                <p>
+                   El tiempo de respuesta ante algún evento depende de varios factores (frecuencia con que se invoca la función, cantidad lineas código, carga de los servidores, etc)
+                </p>
+                <p class="fragment">
+                    Funciones en JS o Pyhon pueden tardar 10 - 100 ms.
+                </p>
+                <p class="fragment">
+                    Funciones en Java pueden estar atadas a tiempos de la JVM, pudiendo llegar a mas de 10 segundos.
+                </p>
+
+                <p class="fragment">
+                    Esto puede ser una limitante, dependiendo de las necesidades que se tengan.
+                </p>
+            </section>
+
+            <section>
+                <h3>Faas vs Paas</h3>
+                <p><a href="https://twitter.com/adrianco/status/736553530689998848">Adrian Cockcroft</a></p>
+                <blockquote style="font-size: 30px;line-height: 1.0">
+                    If your PaaS can efficiently start instances in 20ms that run for half a second, then call it serverless
+                </blockquote>
+            </section>
+
+            <section>
+                <h2>Pros</h2>
+
+                <ul>
+                    <li style="font-size: 30px;line-height: 1.0">
+                        <b>Costos:</b>
+                        <ul>
+                            <li>
+                                Se reducen los costos en cuanto a desarrollo (Baas)
+                            </li>
+                            <li>
+                                Costos operativos/infraestructura
+                            </li>
+                            <li>
+                                Costos para escalar (solamente se paga por lo que se utiliza). Ideal para requests ocacionales o tráfico inconsistente
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        <b>Optimizaciones:</b> Una optimización en el código se traduce en un ahorro instantaneo de dinero
+                    </li>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        <b>Deployment</b>
+                    </li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Cons</h2>
+
+                <ul>
+                    <li style="font-size: 30px;line-height: 1.0">
+                        <b>Vendor control:</b> Ya no tenemos control. Pueden cambiar los costos del servicio, cambiar el alcance de la funcionalidad brindada, algun upgrade de API, downtime, etc...
+                    </li>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        <b>Vendor lock-in:</b> Posiblemente no sea fácil una migración entre distintos proveedores
+                    </li>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        <b>Seguridad:</b> Se agranda la superficie de ataque
+                    </li>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        <b>Monitoreo y debugging</b>
+                    </li>
+                </ul>
+            </section>
+        </section>
+        <section>
+            <section>
+                <h2>Databases</h2>
+                <p>
+                    Varios modelos de bases de datos
+                </p>
+                <ul>
+                    <li style="font-size: 30px;line-height: 1.0">
+                        <b>Relational:</b> Mysql, MariaDb
+                    </li>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        <b>Key-value:</b> Redis, CounchDb
+                    </li>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        <b>Document-oriented:</b> Mongodb
+                    </li>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        <b>Column-oriented:</b> Cassandra
+                    </li>
+                    <li class="fragment" style="font-size: 30px;line-height: 1.0">
+                        <b>Graph-oriented:</b> Neo4j
+                    </li>
+                </ul>
+            </section>
+
+            <section>
+                <h3>CAP theorem</h3>
+
+                <p class="fragment" style="font-size: 30px;line-height: 1.0">
+                    El teorema CAP se aplica a sistemas distribuidos que almacenan información
+                </p>
+                <p class="fragment" style="font-size: 30px;line-height: 1.0">
+                    Eric Brewer sostiene que existe un trade-off entre <b>consistency</b>, <b>availability</b> y <b>partition tolerance</b>
+                </p>
+                <p class="fragment" style="font-size: 30px;line-height: 1.0">
+                    El teorema indica que solamente se pueden soportar dos de las tres propiedades mencionadas
+                </p>
+            </section>
+
+            <section>
+                <h3>Consistency</h3>
+
+                <p class="fragment" style="font-size: 30px;line-height: 1.0">
+                    Cada lectura recibe el valor de la escritura más reciente.
+                </p>
+                <p class="fragment" style="font-size: 30px;line-height: 1.0">
+                    La idea es que cada cliente tenga una misma vista de toda la información, como si el cluster fuese uno solo.
+                </p>
+            </section>
+
+            <section>
+                <h3>Availability</h3>
+
+                <p class="fragment" style="font-size: 30px;line-height: 1.0">
+                    <b>Cada</b> nodo devuelve una respuesta (ya sea para una lectura o una escritura) en un tiempo razonable.
+                </p>
+                <p class="fragment" style="font-size: 30px;line-height: 1.0">
+                    Para tener alta disponibilidad es necesario que cualquier nodo responda en un tiempo razonable.
+                </p>
+            </section>
+
+            <section>
+                <h3>Partition Tolerant</h3>
+
+                <p style="font-size: 30px;line-height: 1.0">
+                    El sistema sigue operando a pesar de que los mensajes entre los nodos pueden llegar a perderse (o retrasarse), debido a fallas en la red.
+                </p>
+                <p class="fragment" style="font-size: 30px;line-height: 1.0">
+                    La idea es poder recuperarse de estas fallas parciales.
+                </p>
+            </section>
+
+            <section>
+                <img src="./images/CAP.png">
+            </section>
+
+            <section>
+                <p>Siguiendo este teorema nos encontramos bajo 3 casos:</p>
+
+                <p class="fragment" style="font-size: 30px;line-height: 1.0">
+                    CP (Consistent and Partition Tolerant): Sistemas que sacrifican la disponibilidad en casos de una partición de la red
+                </p>
+                <p class="fragment" style="font-size: 30px;line-height: 1.0">
+                    AP (Available and Partition Tolerant) - Sistemas que siempre están disponibles, pero ante una partición de la red no pueden garantizar consistencia.
+                </p>
+                <p class="fragment" style="font-size: 30px;line-height: 1.0">
+                    CA (Consistent and Available) - Sistemas que siempre estan disponibles y son consistentes.
+                    Un solo nodo de la red entra en esta categoría. Un solo nodo no necesita resolver los problemas relacionados a las particiones en la red.
+                    El único problema es que un solo nodo no forma un sistema distribuido.
+                </p>
+                <p class="fragment" style="font-size: 30px;line-height: 1.0">
+                    Recordar que el teorema CAP se aplica a sistemas distribuidos que almacenan información.
+                </p>
+            </section>
+
+            <section>
+                <p>En cualquier base de datos distribuida la tolerancia a fallas, por lo que al diseñar un sistema siempre se debe elegir entre consistencia y  disponibilidad.</p>
+                <img src="./images/CAP2.png" style="width: 500px;">
+            </section>
+
+            <section>
+                <img src="./images/CAP3.png">
+            </section>
+
+        </section>
+
+    </div>
+</div>
+
+<script src="lib/js/head.min.js"></script>
+<script src="js/reveal.js"></script>
+
+<script>
+    // More info about config & dependencies:
+    // - https://github.com/hakimel/reveal.js#configuration
+    // - https://github.com/hakimel/reveal.js#dependencies
+    Reveal.initialize({
+        dependencies: [
+            {src: 'plugin/markdown/marked.js'},
+            {src: 'plugin/markdown/markdown.js'},
+            {src: 'plugin/notes/notes.js', async: true},
+            {
+                src: 'plugin/highlight/highlight.js', async: true, callback: function () {
+                    hljs.initHighlightingOnLoad();
+                }
+            }
+        ]
+    });
+</script>
+</body>
+</html>
